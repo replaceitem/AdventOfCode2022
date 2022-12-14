@@ -14,7 +14,7 @@ public class Util {
     }
 
     public static @NotNull List<String> loadInput(String location) throws IOException {
-        try (InputStream resourceAsStream = Util.class.getClassLoader().getResourceAsStream(location)) {
+        try (InputStream resourceAsStream = Util.class.getClassLoader().getResourceAsStream("inputs/" + location)) {
             if(resourceAsStream == null) throw new IOException();
             return loadInput(resourceAsStream);
         }
