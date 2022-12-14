@@ -1,5 +1,6 @@
 package net.replaceitem.days;
 
+import net.replaceitem.AsciiCanvas;
 import net.replaceitem.Util;
 
 import java.io.IOException;
@@ -14,6 +15,8 @@ public class Day10 {
 
         AtomicInteger signalStrengthSum = new AtomicInteger(0);
 
+        AsciiCanvas crt = new AsciiCanvas(40,6,'.');
+
         InstructionExecutor executor = new InstructionExecutor() {
             @Override
             protected void onClockTick() {
@@ -21,12 +24,20 @@ public class Day10 {
                     int signalStrength = clock*register;
                     signalStrengthSum.addAndGet(signalStrength);
                 }
+
+                int crtX = (clock-1)%40;
+                int crtY = (clock-1)/40;
+                if(register >= crtX-1 && register <= crtX+1) {
+                    crt.setPixel(crtX, crtY, '#');
+                }
             }
         };
 
         for (Instruction instruction : instructions) {
             instruction.execute(executor);
         }
+
+        crt.print();
 
         System.out.println(signalStrengthSum.get());
     }
