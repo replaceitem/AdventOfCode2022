@@ -5,7 +5,7 @@ import net.replaceitem.Util;
 import java.io.IOException;
 import java.util.*;
 
-public class Day11_1 {
+public class Day11_2 {
     public static void main(String[] args) throws IOException {
         List<String> lines = Util.loadInput("input11");
 
@@ -30,7 +30,7 @@ public class Day11_1 {
             switch (location) {
                 case "Starting items" -> {
                     if (value == null || currentlyParsing == null) continue;
-                    currentlyParsing.items.addAll(Arrays.stream(value.split(", ")).map(Integer::parseInt).toList());
+                    currentlyParsing.items.addAll(Arrays.stream(value.split(", ")).mapToLong(Long::parseLong).boxed().toList());
                 }
                 case "Operation" -> {
                     if (value == null || currentlyParsing == null) continue;
@@ -53,13 +53,16 @@ public class Day11_1 {
 
         }
 
-        for (int round = 0; round < 20; round++) {
+        long lcm = Util.leastCommonMultiple(Monkey.monkeys.values().stream().map(monkey -> monkey.test.operand).toList());
+        System.out.println("LCM: " + lcm);
+
+        for (int round = 0; round < 10_000; round++) {
             Monkey.monkeys.forEach((integer, monkey) -> {
-                List<Integer> items = monkey.items;
+                List<Long> items = monkey.items;
                 for (int i = 0; i < items.size(); i++) {
-                    Integer item = items.get(i);
+                    long item = items.get(i);
+                    items.set(i, monkey.operation.evaluate(item) % lcm);
                     monkey.inspectionCount++;
-                    items.set(i, monkey.operation.evaluate(item) / 3);
                     boolean test = monkey.test.test(items.get(i));
                     int throwTarget = test ? monkey.throwToTrue : monkey.throwToFalse;
                     Monkey.monkeys.get(throwTarget).items.add(items.remove(i));
@@ -68,9 +71,9 @@ public class Day11_1 {
             });
         }
 
-        List<Monkey> ranking = Monkey.monkeys.values().stream().sorted(Comparator.comparingInt(o -> -o.inspectionCount)).toList();
-        int result = ranking.get(0).inspectionCount * ranking.get(1).inspectionCount;
-
+        List<Monkey> ranking = Monkey.monkeys.values().stream().sorted(Comparator.comparingLong(o -> -o.inspectionCount)).toList();
+        System.out.println(ranking);
+        long result = ranking.get(0).inspectionCount * ranking.get(1).inspectionCount;
         System.out.println(result);
     }
 
@@ -86,13 +89,14 @@ public class Day11_1 {
         static Map<Integer, Monkey> monkeys = new LinkedHashMap<>();
 
         int id;
-        List<Integer> items = new ArrayList<>();
+        // go BIG or go home
+        List<Long> items = new ArrayList<>();
         Operation operation;
         Test test;
         int throwToTrue;
         int throwToFalse;
 
-        int inspectionCount = 0;
+        long inspectionCount = 0;
 
 
         public Monkey(int id) {
@@ -103,34 +107,34 @@ public class Day11_1 {
 
     static class Test {
         // method, if more than divisible
-        int operand;
+        long operand;
 
         public Test(String str) {
             if(str.startsWith("divisible by ")) {
-                operand = Integer.parseInt(str.replace("divisible by ", ""));
+                operand = Long.parseLong(str.replace("divisible by ", ""));
             }
         }
 
-        public boolean test(int num) {
+        public boolean test(long num) {
             return num % operand == 0;
         }
     }
 
     static class Operation {
-        int left, right;
+        long left, right;
         char operator;
 
         public Operation(String str) {
             String[] s = str.split(" ");
             if(s.length != 3) throw new RuntimeException("Invalid operation: " + str);
-            left = s[0].equals("old") ? -1 : Integer.parseInt(s[0]);
-            right = s[2].equals("old") ? -1 : Integer.parseInt(s[2]);
+            left = s[0].equals("old") ? -1 : Long.parseLong(s[0]);
+            right = s[2].equals("old") ? -1 : Long.parseLong(s[2]);
             operator = s[1].charAt(0);
         }
 
-        public int evaluate(int old) {
-            int leftVal = left == -1 ? old : left;
-            int rightVal = right == -1 ? old : right;
+        public long evaluate(long old) {
+            long leftVal = left == -1 ? old : left;
+            long rightVal = right == -1 ? old : right;
             return Util.evalBinaryOperation(leftVal, operator, rightVal);
         }
     }
