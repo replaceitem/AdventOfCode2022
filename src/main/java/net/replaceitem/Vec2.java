@@ -26,6 +26,14 @@ public class Vec2 {
         return new Vec2(this.x*multiplier, this.y*multiplier);
     }
 
+    public Vec2 move(Direction dir) {
+        return this.add(dir.getOffset());
+    }
+
+    public Vec2 move(Direction dir, int amount) {
+        return this.add(dir.getOffset().mult(amount));
+    }
+
     @Override
     public int hashCode() {
         return this.x+this.y*31;

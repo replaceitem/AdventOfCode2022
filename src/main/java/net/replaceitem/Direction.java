@@ -1,8 +1,13 @@
 package net.replaceitem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Direction {
     private final Vec2 offset;
     private final int ordinal;
+
+    public static final List<Direction> DIRECTIONS = new ArrayList<>(4);
 
     public static final Direction NORTH = new Direction(new Vec2(0, -1),  0);
     public static final Direction EAST = new Direction(new Vec2(1, 0),  1);
@@ -17,6 +22,7 @@ public class Direction {
     public Direction(Vec2 offset, int ordinal) {
         this.offset = offset;
         this.ordinal = ordinal;
+        DIRECTIONS.add(this);
     }
 
     public Vec2 getOffset() {
