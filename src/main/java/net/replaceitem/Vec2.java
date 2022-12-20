@@ -43,4 +43,9 @@ public class Vec2 {
     public boolean equals(Object obj) {
         return obj instanceof Vec2 vec2 && this.x == vec2.x && this.y == vec2.y;
     }
+
+    @Override
+    public String toString() {
+        return this.x + "," + this.y;
+    }
 }

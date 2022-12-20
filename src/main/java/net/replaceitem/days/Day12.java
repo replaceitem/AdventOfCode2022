@@ -26,8 +26,25 @@ public class Day12 {
         map.printMap();
 
         //checkPathsRec();
-        List<Vec2> path = getPath(start, end);
-        System.out.println(path.size()-1);
+        List<Vec2> SEpath = getPath(start, end);
+
+        int minLength = Integer.MAX_VALUE;
+        for (int i = 0; i < map.w; i++) {
+            for (int j = 0; j < map.h; j++) {
+                Vec2 pos = new Vec2(i, j);
+                char c = map.get(pos);
+                if(c == 'a') {
+                    System.out.println("Trying position at " + pos);
+                    List<Vec2> aEpath = getPath(pos, end);
+                    if(aEpath == null) continue;
+                    int pathLength = aEpath.size() - 1;
+                    if(pathLength < minLength) minLength = pathLength;
+                }
+            }
+        }
+
+        System.out.println("Shortest path from S to E :" + (SEpath.size()-1));
+        System.out.println("Minimum path length from a to E: " + minLength);
     }
 
 
@@ -66,11 +83,17 @@ public class Day12 {
                     bridged = true;
                 }
             }
-            if(bridged) break;
+            //if(bridged) break;
         }
 
 
+        System.out.print('\t');
+        for (int j = 0; j < map.w; j++) {
+            System.out.print(j + "\t");
+        }
+        System.out.println();
         for (int i = 0; i < map.h; i++) {
+            System.out.print(i + "\t");
             for (int j = 0; j < map.w; j++) {
                 PathFindingElement pathFindingElement = lookup.get(new Vec2(j, i));
                 String label = pathFindingElement == null ? "-" : String.valueOf(pathFindingElement.depth);
@@ -83,8 +106,13 @@ public class Day12 {
         Vec2 current = start;
         path.add(current);
         while(!current.equals(end)) {
-            Optional<Vec2> highest = map.movablePositions(current).sorted(Comparator.comparingInt(value -> lookup.containsKey(value) ? lookup.get(value).depth : Integer.MAX_VALUE)).findFirst();
+            Optional<Vec2> highest = map.movablePositions(current).min(Comparator.comparingInt(value -> lookup.containsKey(value) ? lookup.get(value).depth : Integer.MAX_VALUE));
             Vec2 nextPos = highest.orElseThrow();
+            if(!lookup.containsKey(nextPos) || lookup.get(nextPos).depth >= lookup.get(current).depth) {
+                // counldnt step closer -> impossible
+                path = null;
+                break;
+            }
             path.add(nextPos);
             current = nextPos;
         }
